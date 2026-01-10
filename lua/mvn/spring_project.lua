@@ -73,8 +73,6 @@ local picker_lists = {
 
 local index = 1
 
-local telescopeOpts = {}
-
 ---@param values Array
 ---@param func function|nil
 local values = function(values, func)
@@ -130,7 +128,12 @@ local spring_request = function()
     })
 end
 
-local pickers_choice = function(title, results, func)
+---@type Spring
+local res
+
+local M = {}
+
+M.pickers_choice = function(title, results, func)
     pickers.pickers_menu({
         title = title,
         results = results,
@@ -144,15 +147,10 @@ local pickers_choice = function(title, results, func)
         callback = function(selection)
             func(selection[1])
         end
-    }, telescopeOpts)
+    })
 end
 
-
----@param res Spring
-local function run_next(res)
-    local types = values(res.type.values, function(value)
-        return value.action == '/starter.zip'
-    end)
+M.run_next = function(self)
     local item = picker_lists[index]
 
     if not item then
@@ -170,24 +168,28 @@ local function run_next(res)
     local results
 
     if item.key == 'type' then
-        results = types
+        results = values(res.type.values, function(value)
+            return value.action == '/starter.zip'
+        end)
     else
         results = values(res[item.key].values)
     end
 
-    pickers_choice(item.label, results, function(selection)
+    self.pickers_choice(item.label, results, function(selection)
         springParams[item.key] = selection
 
         index = index + 1
 
-        run_next(res)
+        self:run_next()
     end)
 end
 
-local M = {}
+M.create_project = function()
+    index = 1
 
-M.create_project = function(opts)
-    telescopeOpts = opts or require("telescope.themes").get_dropdown({})
+    if res ~= nil then
+        M:run_next()
+    end
 
     Job:new({
         command = "curl",
@@ -197,10 +199,10 @@ M.create_project = function(opts)
         },
         on_exit = function(j)
             ---@type Spring
-            local res = vim.json.decode(j:result()[1])
+            res = vim.json.decode(j:result()[1])
 
             vim.schedule(function()
-                run_next(res)
+                M:run_next()
             end)
         end
     }):start()

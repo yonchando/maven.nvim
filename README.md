@@ -12,15 +12,15 @@ This is neovim plugin for running maven command.
 - [x] Create maven project command
 - [x] Create spring boot project
 - [ ] Run java application
-- [ ] Add spring boot dependencies to pom.xml
+- [x] Add spring boot dependencies to pom.xml
 - [ ] Add maven dependencies from maven repository to pom.xml
 
 ## Requirement
 
 - Neovim 0.11.0+
-- curl 7.73+
+- command curl, unzip
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- mvn command in your `PATH` env
+- mvn command in your env `PATH`
 
 ## Installation
 
@@ -31,7 +31,17 @@ This is neovim plugin for running maven command.
     "https://github.com/yonchando/maven.nvim",
     dependencies = {
         {"nvim-telescope/telescope.nvim"},
-    }
+    },
+    config = function()
+        local mvn = require("mvn")
+
+        mvn.setup()
+
+        vim.keymap.set("n","<leader>mvi", mvn.mvn_cli)
+        vim.keymap.set("n","<leader>mvp", mvn.mvn_create_project)
+        vim.keymap.set("n","<leader>spi", mvn.spring_initializr_project)
+        vim.keymap.set("n","<leader>spd", mvn.spring_dependencies)
+    end
 }
 ```
 
@@ -39,12 +49,17 @@ This is neovim plugin for running maven command.
 
 #### Commands
 
-`:MavenCLI` maven command to execute
+`:MvnCLI` maven command to execute
 
-`:MavenNewProject` to generate `archetype:generate`
+`:MvnNewProject` to generate `archetype:generate`
 
-`:SpringBootStarter` to create spring boot application
+`:SpringStarter` to create spring boot application
+
+`:SpringDependencies` to create spring boot application
 
 #### Keymapping
 
-`<Tab>` to select multiple MavenCLI to run at once
+`<Ctrl+i>` to select multiple `MvnCLI` to run at once
+
+`<Ctrl+i>` to mark multiple `SpringDependencies` to inserts
+

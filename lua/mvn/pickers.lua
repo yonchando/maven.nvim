@@ -3,7 +3,6 @@ local finders = require("telescope.finders")
 local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
-local log = require("mvn.log")
 
 local M = {}
 
@@ -15,9 +14,8 @@ local M = {}
 ---@field make_entry function|nil
 
 ---@param config Config
----@param opts table
-M.pickers_menu = function(config, opts)
-    opts = opts or {}
+M.pickers_menu = function(config)
+    local opts = Opts.theme or require("telescope.themes").get_dropdown({})
 
     local entry_maker = function(entry)
         if config.make_entry == nil then
@@ -40,7 +38,7 @@ M.pickers_menu = function(config, opts)
         sorter = conf.generic_sorter(opts),
         attach_mappings = function(prompt_bufnr, map)
             if opts.mapping ~= nil then
-                opts.mappings(map, actions, action_state)
+                opts.mappings(prompt_bufnr, map)
             end
 
             actions.select_default:replace(function()
