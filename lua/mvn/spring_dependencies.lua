@@ -51,31 +51,20 @@ local spring_dependencies_listing = function()
                 local bufnr = vim.api.nvim_get_current_buf()
                 local content = {}
 
-                -- <dependency>
-                --   <groupId>org.projectlombok</groupId>
-                --   <artifactId>lombok</artifactId>
-                --   <optional>true</optional>
-                -- </dependency>
-                --
-
                 for _, value in pairs(selection) do
-                    table.insert(content, "<dependency>")
+                    table.insert(content, "  <dependency>")
 
-                    table.insert(content, "  <groupId>")
-                    table.insert(content, "    " .. value.groupId)
-                    table.insert(content, "  </groupId>")
+                    table.insert(content, "    <groupId>" .. value.groupId .. "</groupId>")
 
-                    table.insert(content, "  <artifactId>")
-                    table.insert(content, "    " .. value.artifactId)
-                    table.insert(content, "  </artifactId>")
+                    table.insert(content, "    <artifactId>" .. value.artifactId .. "</artifactId>")
 
-                    table.insert(content, "</dependency>")
+                    table.insert(content, "  </dependency>")
                     table.insert(content, "")
                 end
 
-                local currentLine = cursor[1]
+                local line = cursor[1]
 
-                vim.api.nvim_buf_set_lines(bufnr, currentLine, currentLine + #content, false, content)
+                vim.api.nvim_buf_set_lines(bufnr, line, line, true, content)
             end
         })
     end)
