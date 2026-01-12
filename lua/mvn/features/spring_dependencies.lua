@@ -1,6 +1,6 @@
-local pickers = require("mvn.pickers")
+local pickers = require("mvn.view.pickers")
 local Job = require("plenary.job")
-local log = require("mvn.log")
+local log = require("mvn.utils.log")
 
 ---@class dependency
 ---@field groupId string
@@ -13,20 +13,17 @@ local dependencies = {}
 local current_version = nil
 
 ---@param values Array
----@param func function|nil
-local values = function(values, func)
+local values = function(values)
     local items = {}
 
     for _, value in pairs(values) do
-        if func == nil or func(value) then
-            table.insert(items, { value.id, value.name })
-        end
+        table.insert(items, { value.id, value.name })
     end
 
     return items
 end
 
-local spring_dependencies_listing = function()
+function M:spring_dependencies_listing()
     vim.schedule(function()
         local results = {}
 
@@ -70,7 +67,7 @@ local spring_dependencies_listing = function()
     end)
 end
 
-local spring_dependencies = function()
+function M:spring_dependencies()
     Job:new({
         command = "curl",
         args = {
@@ -88,13 +85,13 @@ local spring_dependencies = function()
             if j:result()[1] ~= nil then
                 dependencies = vim.json.decode(j:result()[1])
 
-                spring_dependencies_listing()
+                self:spring_dependencies_listing()
             end
         end
     }):start()
 end
 
-local spring_versions = function()
+function M:spring_versions()
     pickers.pickers_menu({
         title = "Spring version",
         make_entry = function(entry)
@@ -107,19 +104,19 @@ local spring_versions = function()
         results = versions,
         callback = function(version)
             current_version = version[1]
-            spring_dependencies()
+            self:spring_dependencies()
         end
     })
 end
 
 M.choose_dependencies = function()
     if current_version ~= nil then
-        spring_dependencies()
+        M:spring_dependencies()
         return
     end
 
     if #versions > 0 then
-        spring_versions()
+        M:spring_versions()
     else
         Job:new({
             command = 'curl',
@@ -133,7 +130,7 @@ M.choose_dependencies = function()
                         ---@type Spring
                         local spring = vim.json.decode(j:result()[1])
                         versions = values(spring.bootVersion.values)
-                        spring_versions()
+                        M:spring_versions()
                     end
                 end)
             end

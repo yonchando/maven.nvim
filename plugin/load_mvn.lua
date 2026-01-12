@@ -1,19 +1,14 @@
 local reload = function()
     package.loaded["mvn"] = nil
-    package.loaded["mvn.ui"] = nil
-    package.loaded["mvn.pickers"] = nil
-    package.loaded["mvn.job"] = nil
-    package.loaded["mvn.spring_project"] = nil
-    package.loaded["mvn.spring_dependencies"] = nil
+    package.loaded["mvn.view.float"] = nil
+    package.loaded["mvn.utils.job"] = nil
+    package.loaded["mvn.features.spring_project"] = nil
 end
 
 vim.keymap.set("n", "<leader>tt", function()
-    local noice = require("noice")
-
-    noice.notify("Spring Loading ... ", 1)
     reload()
     local mvn = require("mvn")
-    mvn.spring_dependencies()
+    mvn.spring_initializr_project()
 end)
 
 vim.api.nvim_create_user_command("MvnCLI", function()

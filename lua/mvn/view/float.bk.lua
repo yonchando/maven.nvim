@@ -1,9 +1,9 @@
-local log = require("mvn.log")
-local floats = {}
+local config = require("mvn.core.config")
+local stats = require("mvn.stats")
 
 local keymap = function(mode, key, callback)
     vim.keymap.set(mode, key, callback, {
-        buffer = floats.bufnr,
+        buffer = stats.floats.bufnr,
         nowait = true,
         silent = true
     })
@@ -51,8 +51,8 @@ M.quit = function()
         M.stop_spinner()
     end
 
-    vim.api.nvim_win_close(floats.win, false)
-    vim.api.nvim_buf_delete(floats.bufnr, {})
+    vim.api.nvim_win_close(stats.floats.win, false)
+    vim.api.nvim_buf_delete(stats.floats.bufnr, {})
 end
 
 ---@class OutputConfig
@@ -74,11 +74,11 @@ M.create_output = function(opts)
         border = "rounded",
     }
 
-    floats.bufnr = vim.api.nvim_create_buf(false, true)
+    stats.floats.bufnr = vim.api.nvim_create_buf(false, true)
 
-    floats.win = vim.api.nvim_open_win(floats.bufnr, true, win_config)
+    stats.floats.win = vim.api.nvim_open_win(stats.floats.bufnr, true, win_config)
 
-    vim.api.nvim_set_current_buf(floats.bufnr)
+    vim.api.nvim_set_current_buf(stats.floats.bufnr)
 
     if opts.attach_mappings == nil then
         keymap('n', 'q', M.quit)
@@ -87,7 +87,7 @@ M.create_output = function(opts)
         opts.attach_mappings(keymap)
     end
 
-    return floats
+    return stats.floats
 end
 
 return M
