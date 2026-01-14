@@ -35,6 +35,15 @@ local index = 1
 ---@field results Spring
 local M = {}
 
+function M:new(o)
+    o = o or {}
+
+    setmetatable(o, self)
+    self.__index = self
+
+    return o
+end
+
 ---@param values value[]
 M.values = function(values)
     local items = {}
@@ -80,29 +89,43 @@ function M:spring_request()
     local url = "https://start.spring.io/starter.zip?" .. query
 
     self.cwd = vim.fn.getcwd()
-    stats.float = setmetatable({}, { __index = Float })
-    stats.float:init()
-
-    stats.float:on("WinClosed", function()
-        util.change_location(self.cwd .. "/" .. springParams.artifactId)
-    end)
 
     job.run({
         cmd = "curl",
         cwd = self.cwd,
         args = { "-L", "--location", url, "-o", springParams.artifactId .. '.zip' },
-        message_start = "Project init...",
-        message_finish = "Project spring boot created.",
-        on_exit = function()
-            vim.bo[stats.float.bufnr].modifiable = true
+        silent = true,
+        on_exit = function(message, code)
+            local args = { springParams.artifactId .. ".zip" }
 
-            job.run({
-                cmd = "unzip",
-                cwd = self.cwd,
-                args = { springParams.artifactId .. ".zip" },
-                message_start = "unzip",
-                message_finish = "unzip",
-            })
+            if code == 0 then
+                job.run({
+                    cmd = "unzip",
+                    cwd = self.cwd,
+                    args = args,
+                    message_start = "Extract project",
+                    message_finish = "Extract project",
+
+                    on_exit = function(m, c)
+                        if c == 0 then
+                            stats.float:on("WinClosed", function()
+                                util.change_location(self.cwd .. "/" .. springParams.artifactId)
+                            end)
+
+                            job.run({
+                                cmd = "rm",
+                                cwd = self.cwd,
+                                args = args,
+                                silent = true
+                            })
+                        else
+                            log.error(m)
+                        end
+                    end
+                })
+            else
+                log.error(message)
+            end
         end
     })
 end
@@ -143,11 +166,11 @@ M.run_next = function(self)
     end)
 end
 
-M.initialzr = function(self)
+function M:initialzr()
     index = 1
 
     if self.results ~= nil then
-        M:run_next()
+        self:run_next()
         return
     end
 
@@ -162,7 +185,7 @@ M.initialzr = function(self)
                 if j:result() then
                     ---@type Spring
                     self.results = vim.json.decode(j:result()[1])
-                    M:run_next()
+                    self:run_next()
                 end
             end)
         end

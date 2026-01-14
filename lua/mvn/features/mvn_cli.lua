@@ -15,9 +15,6 @@ M.choose_cli = function()
         callback = function(selection)
             local cwd = vim.fn.getcwd()
 
-            stats.float = setmetatable({}, { __index = Float })
-            stats.float:init()
-
             local pom = vim.uv.fs_stat(cwd .. "/pom.xml")
 
             if pom ~= nil then

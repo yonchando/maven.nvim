@@ -1,8 +1,11 @@
 local Job = require("plenary.job")
 local log = require("mvn.utils.log")
 local stats = require("mvn.stats")
+local Float = require("mvn.view.float")
 
 local M = {}
+
+local message = {}
 
 local current_job
 
@@ -10,11 +13,12 @@ local current_job
 ---@field cmd string|nil
 ---@field args table
 ---@field cwd string
----@field message_finish string
----@field message_start string
----@field on_stdout function|nil
----@field on_stderr function|nil
----@field on_exit function|nil
+---@field message_finish? string
+---@field message_start? string
+---@field on_stdout? fun(data: string)
+---@field on_stderr? fun(data: string)
+---@field on_exit? fun(messages: table<string>, code: number, signal: number)
+---@field silent? boolean
 
 ---@class Window
 ---@field bufnr number
@@ -22,10 +26,18 @@ local current_job
 
 ---@param opts RunConfig
 M.run = function(opts)
-    local command = opts.cmd or 'mvn'
-
-    ---@type MWinFloat
+    stats.float = setmetatable({}, { __index = Float })
     local float = stats.float
+
+    if not opts.silent then
+        stats.float:init()
+        vim.api.nvim_set_option_value("wrap", true, {
+            scope = 'local',
+            win = float.win
+        })
+    end
+
+    local command = opts.cmd or 'mvn'
 
     current_job = Job:new({
         command = command,
@@ -47,6 +59,8 @@ M.run = function(opts)
                 else
                     opts.on_stdout(data)
                 end
+
+                vim.cmd("normal! G")
             end)
         end,
 
@@ -64,19 +78,21 @@ M.run = function(opts)
                     opts.on_stderr(data)
                 end
             end)
+
+            table.insert(message, data)
         end,
 
-        on_exit = function()
+        on_exit = function(_, code, signal)
             vim.schedule(function()
-                float:stop_spinner()
                 if float:buf_valid() then
+                    float:stop_spinner()
                     vim.api.nvim_buf_set_lines(float.bufnr, 0, 1, false, { opts.message_finish .. " ✔" })
-                    vim.bo[float.bufnr].modifiable = false
                 end
+
                 current_job = nil
 
                 if opts.on_exit ~= nil then
-                    opts.on_exit()
+                    opts.on_exit(message, code, signal)
                 end
             end)
         end,
@@ -85,17 +101,17 @@ M.run = function(opts)
     -- clear previous output
     if float:buf_valid() then
         vim.api.nvim_buf_set_lines(float.bufnr, 0, -1, false, { opts.message_start .. "..." })
+
+        float:start_spinner(opts.message_start)
+
+        float:on("WinClosed", function(self)
+            if current_job then
+                current_job:shutdown()
+                self:stop_spinner()
+            end
+        end)
+        float:on({ "BufDelete", "BufHidden" }, float.close)
     end
-
-    float:start_spinner(opts.message_start)
-
-    float:on("WinClosed", function(self)
-        if current_job then
-            current_job:shutdown()
-            self:stop_spinner()
-        end
-    end)
-    float:on({ "BufDelete", "BufHidden" }, float.close)
 
     current_job:start()
 end

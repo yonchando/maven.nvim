@@ -23,7 +23,10 @@ M.mvn_create_project = function()
 end
 
 M.spring_initializr_project = function()
-    spring_project:initialzr()
+    ---@type SpringProject
+    local self = spring_project:new(nil)
+
+    self:initialzr()
 end
 
 M.spring_dependencies = function()

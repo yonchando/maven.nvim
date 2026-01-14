@@ -1,9 +1,9 @@
 local pickers = require("mvn.view.pickers")
-local Float = require("mvn.view.float")
 local job = require("mvn.utils.job")
 local stats = require("mvn.stats")
 local Config = require("mvn.core.config")
 local util = require("mvn.util")
+local log = require("mvn.utils.log")
 
 local M = {}
 
@@ -22,24 +22,20 @@ M.create_projects = function(self, selection)
         "-DinteractiveMode=false"
     }
 
-    stats.float = setmetatable({}, { __index = Float })
-    stats.float:init()
-
-    stats.float:on("WinClosed", function()
-        vim.schedule(function()
-            util.change_location(self.cwd .. "/" .. self.artifactId)
-        end)
-    end)
-
-    if stats.float:buf_valid() then
-        vim.api.nvim_buf_set_lines(stats.float.bufnr, 1, 1, false, args)
-    end
-
     job.run({
         cwd = self.cwd,
         args = args,
         message_start = "Proejct initial",
         message_finish = "Project initial success",
+        on_exit = function()
+            if stats.float:buf_valid() then
+                stats.float:on("WinClosed", function()
+                    vim.schedule(function()
+                        util.change_location(self.cwd .. "/" .. self.artifactId)
+                    end)
+                end)
+            end
+        end
     })
 end
 
