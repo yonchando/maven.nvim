@@ -108,10 +108,11 @@ function M:spring_request()
 
                     on_exit = function(m, c)
                         if c == 0 then
-                            stats.float:on("WinClosed", function()
-                                util.change_location(self.cwd .. "/" .. springParams.artifactId)
-                            end)
-
+                            if stats.float:buf_valid() then
+                                stats.float:on("WinClosed", function()
+                                    util.change_location(self.cwd .. "/" .. springParams.artifactId)
+                                end)
+                            end
                             job.run({
                                 cmd = "rm",
                                 cwd = self.cwd,
@@ -166,7 +167,9 @@ M.run_next = function(self)
     end)
 end
 
-function M:initialzr()
+function M.initialzr()
+    local self = setmetatable({}, M)
+
     index = 1
 
     if self.results ~= nil then

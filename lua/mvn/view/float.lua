@@ -70,6 +70,8 @@ function M:init(opts)
     self.mapping = self.opts.mapping or {}
 
     self:mount()
+
+    return self
 end
 
 function M:layout()
@@ -151,6 +153,8 @@ function M:close(opts)
     end
 
     vim.schedule(function()
+        self:stop_spinner()
+
         if win and vim.api.nvim_win_is_valid(win) then
             vim.api.nvim_win_close(win, true)
         end

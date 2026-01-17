@@ -23,14 +23,15 @@ M.mvn_create_project = function()
 end
 
 M.spring_initializr_project = function()
-    ---@type SpringProject
-    local self = spring_project:new(nil)
-
-    self:initialzr()
+    spring_project.initialzr()
 end
 
 M.spring_dependencies = function()
     spring_dependencies.choose_dependencies()
+end
+
+M.test = function()
+    mvn_artchetype.choose_projects()
 end
 
 return M

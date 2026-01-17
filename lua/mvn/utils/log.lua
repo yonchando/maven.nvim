@@ -2,9 +2,9 @@ local M = {}
 M.info = function(value, inspect)
     inspect = inspect or true
     if inspect then
-        vim.print(vim.inspect(value), vim.log.levels.INFO)
+        vim.notify(vim.inspect(value), vim.log.levels.INFO)
     else
-        vim.print(value, vim.log.levels.INFO)
+        vim.notify(value, vim.log.levels.INFO)
     end
 end
 M.error = function(value)
