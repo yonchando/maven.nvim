@@ -13,3 +13,7 @@ end, { desc = 'Show Maven Initializer UI', bar = true, nargs = 0 })
 vim.api.nvim_create_user_command('MavenFavorites', function()
     require('maven').show_favorite_commands()
 end, { desc = 'Show Maven Favorite Commands', bar = true, nargs = 0 })
+
+vim.api.nvim_create_user_command('MavenTest', function()
+    require('maven').show_test_view()
+end, { desc = 'Show Maven Test UI', bar = true, nargs = 0 })

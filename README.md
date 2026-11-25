@@ -33,6 +33,7 @@
 - Cache dependencies, plugins and command options
 - List, add and remove favorite commands
 - Set default arguments for executions
+- Run the tests of the current file or project (`:MavenTest`)
 
 ## ⚡️ Requirements
 
@@ -49,7 +50,7 @@
 ```lua
 {
    "oclay1st/maven.nvim",
-   cmd = { "Maven", "MavenInit", "MavenExec", "MavenFavorites" },
+   cmd = { "Maven", "MavenInit", "MavenExec", "MavenFavorites", "MavenTest" },
    dependencies = {
       "MunifTanjim/nui.nvim",
    },
@@ -191,6 +192,22 @@
     size = {
       width = '40%',
       height = '30%',
+    },
+    input_win = {
+      border = {
+        style = { '╭', '─', '╮', '│', '│', '─', '│', '│' },
+      },
+    },
+    options_win = {
+      border = {
+        style = { '', '', '', '│', '╯', '─', '╰', '│' },
+      },
+    },
+  },
+  test_view = {
+    size = {
+      width = '50%',
+      height = '40%',
     },
     input_win = {
       border = {

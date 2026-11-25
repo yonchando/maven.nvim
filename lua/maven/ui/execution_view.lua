@@ -47,7 +47,6 @@ function ExecutionView.new()
                 list = false,
             },
         },
-        _prev_win = vim.api.nvim_get_current_win(),
         _input_prompt = Text(MavenConfig.options.icons.command .. '  mvn ', highlights.SPECIAL),
     }, ExecutionView)
 end
@@ -255,6 +254,8 @@ end
 
 ---Mount the window view
 function ExecutionView:mount()
+    -- remember the window to go back to when the view closes
+    self._prev_win = vim.api.nvim_get_current_win()
     -- crete the list of options
     self:_create_options_component()
     -- create the input component

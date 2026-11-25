@@ -159,6 +159,22 @@ local defaultOptions = {
             },
         },
     },
+    test_view = {
+        size = {
+            width = '50%',
+            height = '40%',
+        },
+        input_win = {
+            border = {
+                style = { '╭', '─', '╮', '│', '│', '─', '│', '│' },
+            },
+        },
+        options_win = {
+            border = {
+                style = { '', '', '', '│', '╯', '─', '╰', '│' },
+            },
+        },
+    },
     console = {
         show_command_execution = true,
         show_lifecycle_execution = true,
