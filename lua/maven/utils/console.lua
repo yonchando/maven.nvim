@@ -16,16 +16,50 @@ local line_patterns = {
     { pattern = '^%[INFO%] BUILD FAILURE', hl = 'DiagnosticError', col_start = 7, col_end = 20 },
     { pattern = '^%[INFO%] BUILD SUCCESS', hl = 'DiagnosticOk', col_start = 7, col_end = 20 },
     { pattern = '^>> Executing', hl = 'DiagnosticOk', col_start = 0, col_end = 14 },
+    -- Surefire test output: highlight the matched span (`match = true`)
+    { pattern = 'T E S T S', hl = 'Title', match = true },
+    { pattern = 'Running [%w_.$]+', hl = 'DiagnosticInfo', match = true },
+    { pattern = 'Tests run: %d+', hl = '@markup.strong', match = true },
+    { pattern = 'Failures: [1-9]%d*', hl = 'DiagnosticError', match = true },
+    { pattern = 'Errors: [1-9]%d*', hl = 'DiagnosticError', match = true },
+    { pattern = 'Skipped: [1-9]%d*', hl = 'DiagnosticWarn', match = true },
+    { pattern = '<<< FAILURE!', hl = 'DiagnosticError', match = true },
+    { pattern = '<<< ERROR!', hl = 'DiagnosticError', match = true },
+    { pattern = 'Failures: 0, Errors: 0', hl = 'DiagnosticOk', match = true },
 }
 
-local function highlight_buf_line(buf, line, line_number)
+---Compute the highlights of a console line
+---@param line string
+---@return { hl: string, col_start: integer, col_end: integer }[]
+M.line_highlights = function(line)
+    local result = {}
     for _, item in ipairs(line_patterns) do
-        if string.find(line, item.pattern) then
-            vim.api.nvim_buf_set_extmark(buf, MavenConfig.namespace, line_number, item.col_start, {
-                end_col = item.col_end,
-                hl_group = item.hl,
-            })
+        if item.match then
+            local init = 1
+            while true do
+                local s, e = string.find(line, item.pattern, init)
+                if not s then
+                    break
+                end
+                table.insert(result, { hl = item.hl, col_start = s - 1, col_end = e })
+                init = e + 1
+            end
+        elseif string.find(line, item.pattern) then
+            table.insert(
+                result,
+                { hl = item.hl, col_start = item.col_start, col_end = item.col_end }
+            )
         end
+    end
+    return result
+end
+
+local function highlight_buf_line(buf, line, line_number)
+    for _, item in ipairs(M.line_highlights(line)) do
+        vim.api.nvim_buf_set_extmark(buf, MavenConfig.namespace, line_number, item.col_start, {
+            end_col = item.col_end,
+            hl_group = item.hl,
+        })
     end
 end
 
