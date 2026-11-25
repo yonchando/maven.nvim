@@ -46,10 +46,29 @@ local append_line = function(line)
     pcall(vim.api.nvim_win_set_cursor, _win, { last_line, 0 })
 end
 
-local function setup_buffer()
-    if not _win or _win == 0 or not vim.api.nvim_win_is_valid(_win) then
-        _win = vim.fn.win_getid(vim.fn.winnr('#'))
+---Find a window to show the console in, never the projects view nor a floating window
+---@return integer
+local function find_console_win()
+    if Utils.is_editor_win(_win) then
+        return _win
     end
+    local previous_win = vim.fn.win_getid(vim.fn.winnr('#'))
+    if Utils.is_editor_win(previous_win) then
+        return previous_win
+    end
+    for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+        if Utils.is_editor_win(winid) then
+            return winid
+        end
+    end
+    -- only the projects view is open: create a window, its placeholder buffer is replaced below
+    local placeholder = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_option_value('bufhidden', 'wipe', { buf = placeholder })
+    return Utils.open_editor_split(placeholder, true)
+end
+
+local function setup_buffer()
+    _win = find_console_win()
     vim.api.nvim_set_current_win(_win)
     if _buf and vim.api.nvim_buf_is_valid(_buf) then
         if not vim.api.nvim_buf_is_loaded(_buf) then

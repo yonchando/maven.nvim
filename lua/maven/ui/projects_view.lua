@@ -53,7 +53,6 @@ local node_type_props = {
 ---@field private _tree NuiTree
 ---@field private _menu_header_line NuiLine
 ---@field private _projects_header_line NuiLine
----@field private _is_visible boolean
 ---@field projects Project[]
 local ProjectView = {}
 
@@ -590,7 +589,6 @@ function ProjectView:_render_win()
         },
     })
     self._win:mount()
-    self._is_visible = true
 end
 
 ---Mount the explorer component
@@ -608,18 +606,46 @@ function ProjectView:mount()
     self:_setup_win_maps()
 end
 
+---Whether the view buffer still exists (it may have been deleted with `:bd`)
+---@return boolean
+function ProjectView:is_valid()
+    local bufnr = self._win and self._win.bufnr
+    -- `:bd` only unloads the buffer, it stays valid but its content is gone
+    return bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr)
+end
+
+---Whether the view is currently displayed in a window
+---@return boolean
+function ProjectView:is_visible()
+    local winid = self._win and self._win.winid
+    return winid ~= nil and vim.api.nvim_win_is_valid(winid)
+end
+
+---@private Whether the view window is the last normal window of its tabpage
+function ProjectView:_is_last_window()
+    local tabpage = vim.api.nvim_win_get_tabpage(self._win.winid)
+    for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(tabpage)) do
+        if winid ~= self._win.winid and vim.api.nvim_win_get_config(winid).relative == '' then
+            return false
+        end
+    end
+    return true
+end
+
 function ProjectView:hide()
+    if self:is_visible() and self:_is_last_window() then
+        -- Closing the last window fails (E444), open an empty one to take its place
+        Utils.open_editor_split(vim.api.nvim_create_buf(true, false), true)
+    end
     self._win:hide()
-    self._is_visible = false
 end
 
 function ProjectView:show()
     self._win:show()
-    self._is_visible = true
 end
 
 function ProjectView:toggle()
-    if self._is_visible then
+    if self:is_visible() then
         self:hide()
     else
         self:show()
@@ -628,8 +654,7 @@ end
 
 ---Unmount the view
 function ProjectView:unmount()
-    self._win:unmount()
-    self._is_visible = false
+    pcall(self._win.unmount, self._win)
 end
 
 ---Set project loading

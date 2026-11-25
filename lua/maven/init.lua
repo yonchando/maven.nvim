@@ -37,7 +37,11 @@ local function load_projects_view()
 end
 
 M.toggle_projects_view = function()
-    if not projects_view then
+    if not projects_view or not projects_view:is_valid() then
+        -- the view was never created, or its buffer was deleted (e.g. with `:bd`)
+        if projects_view then
+            projects_view:unmount()
+        end
         load_projects_view()
     else
         projects_view:toggle()

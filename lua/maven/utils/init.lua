@@ -80,4 +80,32 @@ M.get_jar_file_path = function(group_id, artifact_id, version)
     )
 end
 
+local opposite_side = { left = 'right', right = 'left', top = 'below', bottom = 'above' }
+
+---Open a top-level editor split on the side opposite to the projects view
+---@param bufnr integer buffer to show in the new window
+---@param enter boolean whether to focus the new window
+---@return integer winid
+M.open_editor_split = function(bufnr, enter)
+    local position = require('maven.config').options.projects_view.position
+    return vim.api.nvim_open_win(bufnr, enter, {
+        split = opposite_side[position] or 'left',
+        win = -1,
+    })
+end
+
+---Check whether a window is a normal (non-floating) window that is not the projects view
+---@param winid integer
+---@return boolean
+M.is_editor_win = function(winid)
+    if not winid or winid == 0 or not vim.api.nvim_win_is_valid(winid) then
+        return false
+    end
+    if vim.api.nvim_win_get_config(winid).relative ~= '' then
+        return false
+    end
+    local bufnr = vim.api.nvim_win_get_buf(winid)
+    return vim.api.nvim_get_option_value('filetype', { buf = bufnr }) ~= 'maven'
+end
+
 return M
