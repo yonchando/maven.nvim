@@ -170,7 +170,12 @@ end
 function TestView:_create_options_component()
     local view_options = MavenConfig.options.test_view
     self._options_component = Popup(vim.tbl_deep_extend('force', self._default_opts, {
-        win_options = { cursorline = true, winhighlight = highlights.DEFAULT_WIN_HIGHLIGHT },
+        win_options = {
+            cursorline = true,
+            winhighlight = highlights.DEFAULT_WIN_HIGHLIGHT,
+            number = true,
+            relativenumber = true,
+        },
         border = {
             style = view_options.options_win.border.style,
             padding = view_options.options_win.border.padding or { 0, 0, 0, 0 },
@@ -228,6 +233,15 @@ function TestView:mount()
     self:_create_options_component()
     self:_create_input_component()
     self:_create_layout()
+    -- nui.input enters insert mode and focuses itself on mount; start in the options list instead
+    vim.schedule(function()
+        vim.cmd('stopinsert')
+        local winid = self._options_component.winid
+        if winid and vim.api.nvim_win_is_valid(winid) then
+            vim.api.nvim_set_current_win(winid)
+            vim.api.nvim_win_set_cursor(winid, { 1, 0 })
+        end
+    end)
 end
 
 return TestView
