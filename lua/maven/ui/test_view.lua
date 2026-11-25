@@ -159,11 +159,11 @@ function TestView:_create_input_component()
         vim.api.nvim_set_current_win(self._options_component.winid)
         vim.api.nvim_win_set_cursor(self._options_component.winid, { 1, 0 })
     end
-    self._input_component:map('i', { '<C-n>', '<Down>' }, move_next)
-    self._input_component:map('n', { 'j', '<C-n>', '<Down>' }, move_next)
+    self._input_component:map('i', { '<C-n>', '<Down>' }, move_next, { noremap = true })
+    self._input_component:map('n', { 'j', '<C-n>', '<Down>' }, move_next, { noremap = true })
     self._input_component:map('n', { '<esc>', 'q' }, function()
         self:_close()
-    end)
+    end, { noremap = true })
 end
 
 ---@private Create the options component
