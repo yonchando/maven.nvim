@@ -20,14 +20,14 @@ local single_mojo_plugin = [[
 ]]
 
 T['parse single mojo'] = function()
-  local result = PluginParser.parse(single_mojo_plugin)
-  eq(result.group_id, 'org.apache.maven.plugins')
-  eq(result.artifact_id, 'maven-compiler-plugin')
-  eq(result.version, '3.8.1')
-  eq(#result.goals, 1)
-  eq(result.goals[1].name, 'compile')
-  eq(result.goals[1].prefix, 'compiler')
-  eq(result.goals[1].full_name, 'compiler:compile')
+    local result = PluginParser.parse(single_mojo_plugin)
+    eq(result.group_id, 'org.apache.maven.plugins')
+    eq(result.artifact_id, 'maven-compiler-plugin')
+    eq(result.version, '3.8.1')
+    eq(#result.goals, 1)
+    eq(result.goals[1].name, 'compile')
+    eq(result.goals[1].prefix, 'compiler')
+    eq(result.goals[1].full_name, 'compiler:compile')
 end
 
 local multiple_mojos_plugin = [[
@@ -48,24 +48,24 @@ local multiple_mojos_plugin = [[
 ]]
 
 T['parse multiple mojos'] = function()
-  local result = PluginParser.parse(multiple_mojos_plugin)
-  eq(#result.goals, 2)
-  eq(result.goals[1].name, 'test')
-  eq(result.goals[1].prefix, 'surefire')
-  eq(result.goals[2].name, 'help')
-  eq(result.goals[2].prefix, 'surefire')
+    local result = PluginParser.parse(multiple_mojos_plugin)
+    eq(#result.goals, 2)
+    eq(result.goals[1].name, 'test')
+    eq(result.goals[1].prefix, 'surefire')
+    eq(result.goals[2].name, 'help')
+    eq(result.goals[2].prefix, 'surefire')
 end
 
 T['parse errors on missing plugin tag'] = function()
-  MiniTest.expect.error(function()
-    PluginParser.parse('<invalid><root/></invalid>')
-  end)
+    MiniTest.expect.error(function()
+        PluginParser.parse('<invalid><root/></invalid>')
+    end)
 end
 
 T['parse errors on missing mandatory fields'] = function()
-  MiniTest.expect.error(function()
-    PluginParser.parse('<plugin><groupId>g</groupId></plugin>')
-  end)
+    MiniTest.expect.error(function()
+        PluginParser.parse('<plugin><groupId>g</groupId></plugin>')
+    end)
 end
 
 return T

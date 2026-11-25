@@ -15,12 +15,12 @@ local full_pom = [[
 ]]
 
 T['parse full pom'] = function()
-  local result = PomParser.parse(full_pom)
-  eq(result.group_id, 'com.example')
-  eq(result.artifact_id, 'my-app')
-  eq(result.version, '1.0.0')
-  eq(result.name, 'My App')
-  eq(#result.module_paths, 0)
+    local result = PomParser.parse(full_pom)
+    eq(result.group_id, 'com.example')
+    eq(result.artifact_id, 'my-app')
+    eq(result.version, '1.0.0')
+    eq(result.name, 'My App')
+    eq(#result.module_paths, 0)
 end
 
 local minimal_pom = [[
@@ -30,12 +30,12 @@ local minimal_pom = [[
 ]]
 
 T['parse minimal pom with only artifactId'] = function()
-  local result = PomParser.parse(minimal_pom)
-  eq(result.group_id, nil)
-  eq(result.artifact_id, 'minimal-app')
-  eq(result.version, nil)
-  eq(result.name, nil)
-  eq(#result.module_paths, 0)
+    local result = PomParser.parse(minimal_pom)
+    eq(result.group_id, nil)
+    eq(result.artifact_id, 'minimal-app')
+    eq(result.version, nil)
+    eq(result.name, nil)
+    eq(#result.module_paths, 0)
 end
 
 local pom_with_modules = [[
@@ -52,14 +52,14 @@ local pom_with_modules = [[
 ]]
 
 T['parse pom with modules'] = function()
-  local result = PomParser.parse(pom_with_modules)
-  eq(result.group_id, 'com.example')
-  eq(result.artifact_id, 'parent')
-  eq(result.version, '1.0.0')
-  eq(#result.module_paths, 3)
-  eq(result.module_paths[1], 'module-a')
-  eq(result.module_paths[2], 'module-b')
-  eq(result.module_paths[3], 'module-c')
+    local result = PomParser.parse(pom_with_modules)
+    eq(result.group_id, 'com.example')
+    eq(result.artifact_id, 'parent')
+    eq(result.version, '1.0.0')
+    eq(#result.module_paths, 3)
+    eq(result.module_paths[1], 'module-a')
+    eq(result.module_paths[2], 'module-b')
+    eq(result.module_paths[3], 'module-c')
 end
 
 local pom_single_module = [[
@@ -74,21 +74,21 @@ local pom_single_module = [[
 ]]
 
 T['parse pom with single module'] = function()
-  local result = PomParser.parse(pom_single_module)
-  eq(#result.module_paths, 1)
-  eq(result.module_paths[1], 'only-module')
+    local result = PomParser.parse(pom_single_module)
+    eq(#result.module_paths, 1)
+    eq(result.module_paths[1], 'only-module')
 end
 
 T['parse errors on missing project tag'] = function()
-  MiniTest.expect.error(function()
-    PomParser.parse('<invalid><root/></invalid>')
-  end)
+    MiniTest.expect.error(function()
+        PomParser.parse('<invalid><root/></invalid>')
+    end)
 end
 
 T['parse errors on missing artifactId'] = function()
-  MiniTest.expect.error(function()
-    PomParser.parse('<project><groupId>g</groupId></project>')
-  end)
+    MiniTest.expect.error(function()
+        PomParser.parse('<project><groupId>g</groupId></project>')
+    end)
 end
 
 return T

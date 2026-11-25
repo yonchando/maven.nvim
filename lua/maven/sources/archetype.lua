@@ -12,12 +12,12 @@ Archetype.__index = Archetype
 --- @param versions string[]
 --- @param description? string
 function Archetype.new(artifact_id, group_id, versions, description)
-  return setmetatable({
-    artifact_id = artifact_id,
-    group_id = group_id,
-    versions = versions or {},
-    description = description,
-  }, Archetype)
+    return setmetatable({
+        artifact_id = artifact_id,
+        group_id = group_id,
+        versions = versions or {},
+        description = description,
+    }, Archetype)
 end
 
 return Archetype
