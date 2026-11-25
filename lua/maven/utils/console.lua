@@ -19,7 +19,7 @@ local line_patterns = {
     -- Surefire test output: highlight the matched span (`match = true`)
     { pattern = 'T E S T S', hl = 'Title', match = true },
     { pattern = 'Running [%w_.$]+', hl = 'DiagnosticInfo', match = true },
-    { pattern = 'Tests run: %d+', hl = '@markup.strong', match = true },
+    { pattern = 'Tests run: %d+', hl = 'Title', match = true },
     { pattern = 'Failures: [1-9]%d*', hl = 'DiagnosticError', match = true },
     { pattern = 'Errors: [1-9]%d*', hl = 'DiagnosticError', match = true },
     { pattern = 'Skipped: [1-9]%d*', hl = 'DiagnosticWarn', match = true },
